@@ -1,0 +1,173 @@
+/* speakwithdaniel.com — design tokens and layout.
+   Own palette, distinct from the other properties: paper/ink neutrals, one
+   signal accent. The chrome stays monochrome so the work carries the color. */
+
+:root {
+  --paper: #f7f5f2;
+  --ink: #17161a;
+  --muted: #6b6963;
+  --line: #e4e1da;
+  --accent: #d8482b;
+  --tile: #edeae4;
+  --max: 1120px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #141416;
+    --ink: #ecebe8;
+    --muted: #97948e;
+    --line: #26262a;
+    --accent: #ff6b4a;
+    --tile: #1d1d20;
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: inherit; text-decoration-color: var(--accent); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+a:hover { color: var(--accent); }
+
+/* ---- chrome ---- */
+
+.site-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 1.4rem 1.25rem 0;
+}
+.wordmark {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+.site-head nav { display: flex; gap: 1.1rem; }
+.site-head nav a { text-decoration: none; color: var(--muted); font-size: 0.95rem; }
+.site-head nav a:hover { color: var(--accent); }
+
+main { max-width: var(--max); margin: 0 auto; padding: 0 1.25rem 4rem; }
+
+.site-foot {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 2.5rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.site-foot p { margin: 0.15rem 0; }
+
+/* ---- hero ---- */
+
+.hero { padding: 4.5rem 0 3.2rem; }
+.hero h1 {
+  margin: 0 0 0.6rem;
+  font-size: clamp(2.6rem, 7vw, 4.6rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+.hero .lede {
+  margin: 0;
+  max-width: 34em;
+  font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+  line-height: 1.5;
+}
+.hero .hero-meta {
+  margin: 1.1rem 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.hero .hero-links { margin: 0.4rem 0 0; font-size: 0.95rem; display: flex; flex-wrap: wrap; gap: 0.35rem 1.1rem; padding: 0; list-style: none; }
+
+/* ---- case sections ---- */
+
+.case { padding: 3rem 0 0.5rem; border-top: 1px solid var(--line); }
+.case-head { max-width: 44em; margin-bottom: 1.6rem; }
+.case-head h2, .case-head h3 {
+  margin: 0 0 0.3rem;
+  font-size: 1.55rem;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+}
+.case-head h3 { font-size: 1.2rem; }
+.case-meta {
+  margin: 0 0 0.7rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.case-note { margin: 0; color: var(--ink); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 1rem;
+  margin: 0 0 1.4rem;
+}
+.grid figure { margin: 0; }
+.grid a.shot { display: block; text-decoration: none; }
+.frame {
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--tile);
+  border: 1px solid var(--line);
+}
+.frame.tall { aspect-ratio: 3 / 4; }
+.frame.wide { aspect-ratio: 16 / 9; }
+.frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+.grid figcaption {
+  margin-top: 0.45rem;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+.grid .feature { grid-column: span 2; }
+@media (max-width: 640px) {
+  .grid .feature { grid-column: span 1; }
+}
+
+/* small strip (engine garment layer) */
+.strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 0.6rem;
+  margin: 0 0 0.5rem;
+}
+.strip .frame { aspect-ratio: 7 / 9; border-radius: 4px; }
+.strip-caption { color: var(--muted); font-size: 0.86rem; margin: 0 0 1.4rem; }
+
+/* identity sub-blocks */
+.sub-case { margin: 0 0 2.2rem; }
+
+/* ---- about + contact ---- */
+
+.about { padding: 3rem 0 1rem; border-top: 1px solid var(--line); }
+.about h2 { margin: 0 0 0.8rem; font-size: 1.55rem; letter-spacing: -0.015em; }
+.about p { max-width: 40em; margin: 0 0 1rem; }
+
+.contact { padding: 1rem 0 2rem; }
+.contact h2 { margin: 0 0 0.8rem; font-size: 1.55rem; letter-spacing: -0.015em; }
+.contact ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.35rem 1.2rem; }
