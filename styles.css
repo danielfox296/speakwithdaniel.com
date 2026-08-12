@@ -33,8 +33,10 @@
 .case--skreened { --g: #2b1210; --gi: #f5e9e4; --gm: #cfa89e; }
 .case--dizzy    { --g: #0f3a3d; --gi: #eaf4f2; --gm: #a3c9c5; }
 .case--unfold   { --g: #efe4cf; --gi: #201d16; --gm: #635b48; }
+.case--posters  { --g: #2e2620; --gi: #f2ede4; --gm: #c4b6a3; }
 .case--banker   { --g: #e7d3cc; --gi: #2a1f1e; --gm: #684e48; }
 .case--identity { --g: #171d2a; --gi: #e9edf5; --gm: #9aa4b8; }
+.case--photo    { --g: #eceae5; --gi: #1b1a18; --gm: #5f5d57; }
 .case--earlier  { --g: #e4e1da; --gi: #1d1c1a; --gm: #5c5a54; }
 
 * { box-sizing: border-box; }
