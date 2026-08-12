@@ -226,6 +226,10 @@ main { margin: 0 auto; }
   .ghost img { width: 100%; height: auto; display: block; border-radius: 10px; }
 }
 
+/* photographs sit frameless (Daniel 2026-08-13) — the design cases keep
+   their hairlines, the photo wall floats bare on the gallery ground */
+.case--photo .frame { border: none; background: transparent; }
+
 /* small strip (engine garment layer) — stays a quiet row under the scatter */
 .strip {
   display: grid;

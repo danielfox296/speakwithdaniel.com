@@ -74,14 +74,36 @@ CYCLE = [(1, 3, 0, 2, 0.3), (5, 4, 2, 1, 0.55), (10, 3, -1, 3, 0.7),
          (1, 3, 1, 1, 0.5), (4, 3, -1, 3, 0.75), (8, 4, 2, 2, 0.35),
          (3, 4, 2, 1, 0.65), (9, 3, -2, 2, 0.45), (1, 4, 1, 3, 0.2)]
 
+# photo wall: much bigger scale contrast (Daniel 2026-08-13) — giants against
+# tiny satellites, cycling through twelve steps
+PHOTO_CYCLE = [(1, 8, 0, 2, 0.3), (9, 4, 2, 3, 0.7), (10, 3, -2, 1, 0.45),
+               (2, 3, 2, 2, 0.6), (5, 2, -1, 3, 0.8), (7, 6, 1, 1, 0.25),
+               (1, 2, 2, 2, 0.55), (3, 7, -1, 3, 0.4), (10, 3, 3, 1, 0.65),
+               (1, 4, 1, 2, 0.35), (6, 3, -2, 1, 0.75), (9, 4, 2, 3, 0.5)]
 
-def figures_html(files, alts, indent="      ") -> str:
+
+def frame_class(f: str) -> str:
+    try:
+        with Image.open(OUT / f.replace("img/work/", "").replace("photo/", "photo/", 1)) as im:
+            w, h = im.size
+    except Exception:
+        return "frame"
+    if h > w * 1.15:
+        return "frame tall"
+    if w > h * 1.4:
+        return "frame wide"
+    return "frame"
+
+
+def figures_html(files, alts, indent="      ", cycle=None) -> str:
+    cycle = cycle or CYCLE
     rows = []
     for i, (f, alt) in enumerate(zip(files, alts)):
-        c, cs, dy, z, d = CYCLE[i % len(CYCLE)]
+        c, cs, dy, z, d = cycle[i % len(cycle)]
+        fc = frame_class(f)
         rows.append(
             f'{indent}<figure style="--c:{c};--cs:{cs};--dy:{dy}rem;--z:{z};--d:{d}">\n'
-            f'{indent}  <a class="shot" href="img/work/{f}"><span class="frame"><img src="img/work/{f}" alt="{alt}" loading="lazy"></span></a>\n'
+            f'{indent}  <a class="shot" href="img/work/{f}"><span class="{fc}"><img src="img/work/{f}" alt="{alt}" loading="lazy"></span></a>\n'
             f'{indent}</figure>')
     return "\n".join(rows)
 
@@ -121,6 +143,10 @@ def emit() -> None:
       </div>
     </div>"""
 
+    all_photos = ([f"photo/photo-{n:03d}.jpg" for n in FIGURES]
+                  + [f"photo/photo-{n:03d}.jpg" for n in FACES]
+                  + [f"photo/fs-{n:02d}.jpg" for n in FLATSTATE]
+                  + [f"photo/photo-{n:03d}.jpg" for n in STAGE])
     photography = f"""<section class="case case--photo">
   <div class="shell">
     <header class="case-head">
@@ -129,18 +155,18 @@ def emit() -> None:
       <p class="case-note">A portrait practice ran alongside the design work: business walls, artists and their records, dancers, the occasional wedding. Shot, edited, and finished by me, start to end.</p>
     </header>
     <div class="grid">
-      <figure class="ghost" aria-hidden="true" style="--gx:16%;--gy:4%;--gw:60%;--d:0.08">
+      <figure class="ghost" aria-hidden="true" style="--gx:16%;--gy:3%;--gw:60%;--d:0.08">
         <img src="img/work/photo/fs-12.jpg" alt="" loading="lazy">
       </figure>
-{figures_html([f"photo/photo-{n:03d}.jpg" for n in FIGURES], ["Photograph" for _ in FIGURES])}
+      <figure class="ghost" aria-hidden="true" style="--gx:30%;--gy:55%;--gw:55%;--d:0.11">
+        <img src="img/work/photo/photo-075.jpg" alt="" loading="lazy">
+      </figure>
+{figures_html(all_photos, ["Photograph" for _ in all_photos], cycle=PHOTO_CYCLE)}
     </div>
-{sub("Faces", "The headshot wall: owners, makers, and performers, most of them laughing before the third frame.", FACES)}
-{sub("The Flat State series", "A standing studio portrait series, one subject at a time.", FLATSTATE, prefix="fs-")}
-{sub("Stage and sound", "Musicians at work: studios, stages, windows, and the hour after the set.", STAGE)}
   </div>
 </section>
 """
-    (ROOT / "_src/pages/index/sections/07b-photography.html").write_text(photography)
+    (ROOT / "_src/pages/index/sections/08b-photography.html").write_text(photography)
     print("emitted 05-posters.html, 07b-photography.html")
 
 
