@@ -190,6 +190,8 @@ main { margin: 0 auto; }
   .case .grid figure {
     grid-column: var(--c, auto) / span var(--cs, 4);
     margin-top: var(--dy, 0rem);
+    /* --jx (rem) is horizontal jitter, composed into the drift transform by the
+       engine so BOTH edges leave the grid lines; margins would pin the right edge */
     position: relative;
     z-index: var(--z, 1);
     will-change: transform;

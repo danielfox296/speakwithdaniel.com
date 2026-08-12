@@ -70,18 +70,48 @@ def prep_all() -> None:
         prep(SRC / "design" / f"{name}.jpg", OUT / dst)
 
 
-# deterministic scatter cycles: (col, span, dy_rem, z, d)
-CYCLE = [(1, 3, 0, 2, 0.3), (5, 4, 2, 1, 0.55), (10, 3, -1, 3, 0.7),
-         (2, 4, 3, 2, 0.4), (7, 3, -2, 1, 0.25), (10, 3, 2, 2, 0.6),
-         (1, 3, 1, 1, 0.5), (4, 3, -1, 3, 0.75), (8, 4, 2, 2, 0.35),
-         (3, 4, 2, 1, 0.65), (9, 3, -2, 2, 0.45), (1, 4, 1, 3, 0.2)]
+# Seeded scatter (2026-08-13, replacing fixed cycles): repeating cycles kept
+# landing tiles flush on shared grid lines, which read as accidental alignment.
+# Each tile now draws column, span, stagger, and sub-column jitter (--jx) from
+# a seeded PRNG, with rejection rules so no tile repeats a left or right edge
+# seen among its recent neighbors. Deterministic per (seed, count).
+import random
 
-# photo wall: much bigger scale contrast (Daniel 2026-08-13) — giants against
-# tiny satellites, cycling through twelve steps
-PHOTO_CYCLE = [(1, 8, 0, 2, 0.3), (9, 4, 2, 3, 0.7), (10, 3, -2, 1, 0.45),
-               (2, 3, 2, 2, 0.6), (5, 2, -1, 3, 0.8), (7, 6, 1, 1, 0.25),
-               (1, 2, 2, 2, 0.55), (3, 7, -1, 3, 0.4), (10, 3, 3, 1, 0.65),
-               (1, 4, 1, 2, 0.35), (6, 3, -2, 1, 0.75), (9, 4, 2, 3, 0.5)]
+
+def scatter(n, seed, spans, giant_min=None, giant_gap=5):
+    # pixel model at the canonical 1120px container: 12 tracks, 20px gaps
+    PITCH, GAP, REM = 90.8, 20, 16
+    rng = random.Random(seed)
+    out, lefts, rights, dys = [], [], [], []
+    since_giant = giant_gap  # allow an early giant
+    for i in range(n):
+        for _ in range(80):
+            if giant_min and since_giant >= giant_gap:
+                cs = rng.choice([s for s in spans if s >= giant_min])
+            else:
+                cs = rng.choice(spans)
+            c = rng.randint(1, 13 - cs)
+            dy = round(rng.uniform(-3, 7), 1)
+            jx = round(rng.uniform(-3.5, 3.5), 1)
+            px_l = (c - 1) * PITCH + jx * REM
+            px_r = px_l + cs * PITCH - GAP
+            if any(abs(px_l - p) < 10 for p in lefts[-5:]):
+                continue
+            if any(abs(px_r - p) < 10 for p in rights[-5:]):
+                continue
+            if any(abs(dy - p) < 1.2 for p in dys[-3:]):
+                continue
+            break
+        px_l = (c - 1) * PITCH + jx * REM
+        lefts.append(px_l); rights.append(px_l + cs * PITCH - GAP); dys.append(dy)
+        if giant_min and cs >= giant_min:
+            since_giant = 0
+        else:
+            since_giant += 1
+        z = rng.randint(1, 4)
+        d = round(rng.uniform(0.2, 0.85), 2)
+        out.append((c, cs, dy, jx, z, d))
+    return out
 
 
 def frame_class(f: str) -> str:
@@ -97,14 +127,12 @@ def frame_class(f: str) -> str:
     return "frame"
 
 
-def figures_html(files, alts, indent="      ", cycle=None) -> str:
-    cycle = cycle or CYCLE
+def figures_html(files, alts, places, indent="      ") -> str:
     rows = []
-    for i, (f, alt) in enumerate(zip(files, alts)):
-        c, cs, dy, z, d = cycle[i % len(cycle)]
+    for (f, alt), (c, cs, dy, jx, z, d) in zip(zip(files, alts), places):
         fc = frame_class(f)
         rows.append(
-            f'{indent}<figure style="--c:{c};--cs:{cs};--dy:{dy}rem;--z:{z};--d:{d}">\n'
+            f'{indent}<figure style="--c:{c};--cs:{cs};--dy:{dy}rem;--jx:{jx}rem;--z:{z};--d:{d}">\n'
             f'{indent}  <a class="shot" href="img/work/{f}"><span class="{fc}"><img src="img/work/{f}" alt="{alt}" loading="lazy"></span></a>\n'
             f'{indent}</figure>')
     return "\n".join(rows)
@@ -112,7 +140,8 @@ def figures_html(files, alts, indent="      ", cycle=None) -> str:
 
 def emit() -> None:
     posters_figs = figures_html([f"posters/{n}.jpg" for n in POSTERS],
-                                ["Event poster" for _ in POSTERS])
+                                ["Event poster" for _ in POSTERS],
+                                scatter(len(POSTERS), seed=41, spans=[3, 3, 4, 4, 5, 6]))
     posters = f"""<section class="case case--posters">
   <div class="shell">
     <header class="case-head">
@@ -130,20 +159,6 @@ def emit() -> None:
 </section>
 """
     (ROOT / "_src/pages/index/sections/05-posters.html").write_text(posters)
-
-    def sub(title, note, nums, prefix="photo-"):
-        files = [f"photo/{prefix}{n:03d}.jpg" for n in nums] if prefix == "photo-" \
-            else [f"photo/fs-{n:02d}.jpg" for n in nums]
-        alts = ["Portrait photograph" for _ in nums]
-        return f"""    <div class="sub-case">
-      <header class="case-head">
-        <h3>{title}</h3>
-        <p class="case-note">{note}</p>
-      </header>
-      <div class="grid">
-{figures_html(files, alts)}
-      </div>
-    </div>"""
 
     all_photos = ([f"photo/photo-{n:03d}.jpg" for n in FIGURES]
                   + [f"photo/photo-{n:03d}.jpg" for n in FACES]
@@ -163,7 +178,7 @@ def emit() -> None:
       <figure class="ghost" aria-hidden="true" style="--gx:30%;--gy:55%;--gw:55%;--d:0.11">
         <img src="img/work/photo/photo-075.jpg" alt="" loading="lazy">
       </figure>
-{figures_html(all_photos, ["Photograph" for _ in all_photos], cycle=PHOTO_CYCLE)}
+{figures_html(all_photos, ["Photograph" for _ in all_photos], scatter(len(all_photos), seed=7, spans=[2, 2, 3, 3, 3, 4, 4, 6, 7, 8], giant_min=6, giant_gap=5))}
     </div>
   </div>
 </section>

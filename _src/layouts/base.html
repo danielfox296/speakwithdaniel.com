@@ -98,11 +98,14 @@
 
   // --- drift ---
   var tiles = [];
-  if (!reduced) {
-    document.querySelectorAll('.case .grid figure').forEach(function (t) {
-      tiles.push({ el: t, d: parseFloat(t.style.getPropertyValue('--d')) || 0 });
-    });
-  }
+  document.querySelectorAll('.case .grid figure').forEach(function (t) {
+    var jx = (parseFloat(t.style.getPropertyValue('--jx')) || 0) * 16;
+    if (!reduced) {
+      tiles.push({ el: t, d: parseFloat(t.style.getPropertyValue('--d')) || 0, jx: jx });
+    } else if (jx) {
+      t.style.transform = 'translate3d(' + jx + 'px,0,0)';
+    }
+  });
   var MAX = 120, wide = mm('(min-width: 1100px)').matches;
   function driftFrame() {
     if (!wide) return;
@@ -114,13 +117,17 @@
     });
     shifts.forEach(function (y, i) {
       if (y !== null) {
-        tiles[i].el.style.transform = 'translate3d(0,' + y.toFixed(1) + 'px,0)';
+        tiles[i].el.style.transform =
+          'translate3d(' + tiles[i].jx + 'px,' + y.toFixed(1) + 'px,0)';
       }
     });
   }
   mm('(min-width: 1100px)').addEventListener('change', function (e) {
     wide = e.matches;
     if (!wide) tiles.forEach(function (t) { t.el.style.transform = ''; });
+    else tiles.forEach(function (t) {
+      t.el.style.transform = 'translate3d(' + t.jx + 'px,0,0)';
+    });
     paint();
   });
 
