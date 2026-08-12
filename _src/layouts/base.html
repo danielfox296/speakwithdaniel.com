@@ -82,7 +82,7 @@
   }
   function bgFrame() {
     var mid = window.innerHeight / 2;
-    var win = window.innerHeight * (reduced ? 0.03 : 0.3);
+    var win = window.innerHeight * (reduced ? 0.03 : 0.62);
     var lab = stops[0].lab || paperLab;
     for (var i = 1; i < stops.length; i++) {
       var boundary = stops[i].el.getBoundingClientRect().top;
@@ -100,11 +100,7 @@
   var tiles = [];
   if (!reduced) {
     document.querySelectorAll('.case .grid figure').forEach(function (t) {
-      tiles.push({
-        el: t,
-        d: parseFloat(t.style.getPropertyValue('--d')) || 0,
-        rot: (t.style.getPropertyValue('--rot') || '0deg').trim()
-      });
+      tiles.push({ el: t, d: parseFloat(t.style.getPropertyValue('--d')) || 0 });
     });
   }
   var MAX = 120, wide = mm('(min-width: 1100px)').matches;
@@ -118,8 +114,7 @@
     });
     shifts.forEach(function (y, i) {
       if (y !== null) {
-        tiles[i].el.style.transform =
-          'translate3d(0,' + y.toFixed(1) + 'px,0) rotate(' + tiles[i].rot + ')';
+        tiles[i].el.style.transform = 'translate3d(0,' + y.toFixed(1) + 'px,0)';
       }
     });
   }

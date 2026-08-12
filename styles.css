@@ -33,7 +33,6 @@
 .case--skreened { --g: #2b1210; --gi: #f5e9e4; --gm: #cfa89e; }
 .case--dizzy    { --g: #0f3a3d; --gi: #eaf4f2; --gm: #a3c9c5; }
 .case--unfold   { --g: #efe4cf; --gi: #201d16; --gm: #635b48; }
-.case--drake    { --g: #3d2a12; --gi: #f3e8d8; --gm: #cdb391; }
 .case--banker   { --g: #e7d3cc; --gi: #2a1f1e; --gm: #684e48; }
 .case--identity { --g: #171d2a; --gi: #e9edf5; --gm: #9aa4b8; }
 .case--earlier  { --g: #e4e1da; --gi: #1d1c1a; --gm: #5c5a54; }
@@ -114,9 +113,10 @@ main { margin: 0 auto; }
 /* ---- case sections ---- */
 
 .case {
-  padding: 20vh 0 16vh;
+  padding: 24vh 0 20vh;
   background: var(--g, var(--paper));
   color: var(--gi, var(--ink));
+  overflow: clip;
 }
 /* with the gradiating body layer live, sections go clear and the blend
    happens in the tall padding gaps where nothing readable sits */
@@ -177,7 +177,8 @@ main { margin: 0 auto; }
 /* The scatter: at desktop width each case grid becomes a 12-column canvas
    and every tile takes its authored place (--c/--cs), vertical stagger
    (--dy, negative values overlap the row above), depth (--z, shadow scales
-   with it), tilt (--rot) and drift rate (--d, read by the script). */
+   with it) and drift rate (--d, read by the script). Images sit square:
+   rotation was tried and rejected (Daniel, 2026-08-12) — never tilt them. */
 @media (min-width: 1100px) {
   .case .grid {
     grid-template-columns: repeat(12, 1fr);
@@ -189,7 +190,6 @@ main { margin: 0 auto; }
     margin-top: var(--dy, 0rem);
     position: relative;
     z-index: var(--z, 1);
-    transform: rotate(var(--rot, 0deg));
     will-change: transform;
   }
   .case .grid .feature { grid-column: var(--c, auto) / span var(--cs, 6); }
@@ -197,6 +197,23 @@ main { margin: 0 auto; }
     box-shadow: 0 calc(var(--z, 1) * 7px) calc(var(--z, 1) * 22px)
       color-mix(in oklab, var(--g, #000) 55%, rgb(0 0 0 / 0.45));
   }
+}
+
+/* The ghost plane: a few of the section's own images, echoed far behind the
+   scatter — heavily faded, blurred, and drifting slowest of all, pure
+   texture. Decorative only (empty alt, no links, hidden from readers), and
+   absent below desktop width where the packed grid wants calm. */
+.ghost { display: none; }
+@media (min-width: 1100px) {
+  .case .grid figure.ghost {
+    display: block;
+    z-index: 0;
+    opacity: 0.13;
+    filter: blur(13px) saturate(1.15);
+    pointer-events: none;
+    user-select: none;
+  }
+  .ghost img { width: 100%; height: auto; display: block; border-radius: 10px; }
 }
 
 /* small strip (engine garment layer) — stays a quiet row under the scatter */
