@@ -71,8 +71,8 @@ M = [
     ("cory", "01-card-dark.jpg", find(LOCAL, "Cory and Company", "Screenshot 2026-07-23 at 11.01.00"), {}),
     ("cory", "02-card-light.jpg", find(LOCAL, "Cory and Company", "Screenshot 2026-07-23 at 11.01.22"), {}),
     ("cory", "03-yard-sign.jpg", find(LOCAL, "Cory and Company", "Screenshot 2026-07-23 at 11.03.40"), {}),
-    ("peptides", "01-board.jpg", find(LOCAL, "First Person Peptides", "Artboard 1 copy.pdf"), {"pdf_page": 1}),
-    ("peptides", "02-board.jpg", find(LOCAL, "First Person Peptides", "Artboard 1 copy 2"), {"pdf_page": 1}),
+    # First Person Peptides removed from the page (Daniel, 2026-08-12);
+    # originals stay staged in sources/local if it ever returns.
     # Earlier pieces
     ("earlier", "01-acada.jpg", find(LOCAL, "Older Design Projects", "11.jpg"), {}),
     ("earlier", "02-clipcake.jpg", find(LOCAL, "Older Design Projects", "8.jpg"), {}),

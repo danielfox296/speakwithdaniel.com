@@ -201,12 +201,20 @@ main { margin: 0 auto; }
 
 /* The ghost plane: a few of the section's own images, echoed far behind the
    scatter — heavily faded, blurred, and drifting slowest of all, pure
-   texture. Decorative only (empty alt, no links, hidden from readers), and
-   absent below desktop width where the packed grid wants calm. */
+   texture. Absolutely positioned inside the grid (--gx/--gy/--gw as
+   percentages) so they overlap the real tiles and add ZERO layout height:
+   ghosts renting their own rows read as dead air (Daniel, 2026-08-12).
+   Decorative only (empty alt, no links) and absent below desktop width. */
 .ghost { display: none; }
 @media (min-width: 1100px) {
+  .case .grid { position: relative; }
   .case .grid figure.ghost {
     display: block;
+    position: absolute;
+    left: var(--gx, 10%);
+    top: var(--gy, 10%);
+    width: var(--gw, 50%);
+    margin: 0;
     z-index: 0;
     opacity: 0.13;
     filter: blur(13px) saturate(1.15);
