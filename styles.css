@@ -1,6 +1,11 @@
 /* speakwithdaniel.com — design tokens and layout.
-   Own palette, distinct from the other properties: paper/ink neutrals, one
-   signal accent. The chrome stays monochrome so the work carries the color. */
+   The 2026-08-12 wall system: every case section owns a ground color and, at
+   desktop width, a hand-placed scatter of work tiles at different sizes,
+   depths (drift rate, z, shadow) and slight rotations. The page background
+   gradiates between section grounds as you scroll (script in base.html);
+   without JS each section simply holds its solid ground. Below 1100px the
+   scatter folds back into the packed calm grid. Hero and About stay on the
+   theme paper so the color story opens and closes at home. */
 
 :root {
   --paper: #f7f5f2;
@@ -21,6 +26,17 @@
     --tile: #1d1d20;
   }
 }
+
+/* Section grounds: committed colors derived from each case's own work —
+   they do not follow the OS theme. Ink/muted pairs are contrast-checked
+   against their ground (all inks >= 11:1, muteds >= 4.5:1). */
+.case--skreened { --g: #2b1210; --gi: #f5e9e4; --gm: #cfa89e; }
+.case--dizzy    { --g: #0f3a3d; --gi: #eaf4f2; --gm: #a3c9c5; }
+.case--unfold   { --g: #efe4cf; --gi: #201d16; --gm: #635b48; }
+.case--drake    { --g: #3d2a12; --gi: #f3e8d8; --gm: #cdb391; }
+.case--banker   { --g: #e7d3cc; --gi: #2a1f1e; --gm: #684e48; }
+.case--identity { --g: #171d2a; --gi: #e9edf5; --gm: #9aa4b8; }
+.case--earlier  { --g: #e4e1da; --gi: #1d1c1a; --gm: #5c5a54; }
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -60,7 +76,8 @@ a:hover { color: var(--accent); }
 .site-head nav a { text-decoration: none; color: var(--muted); font-size: 0.95rem; }
 .site-head nav a:hover { color: var(--accent); }
 
-main { max-width: var(--max); margin: 0 auto; padding: 0 1.25rem 4rem; }
+main { margin: 0 auto; }
+.shell { max-width: var(--max); margin: 0 auto; padding: 0 1.25rem; }
 
 .site-foot {
   max-width: var(--max);
@@ -74,12 +91,12 @@ main { max-width: var(--max); margin: 0 auto; padding: 0 1.25rem 4rem; }
 
 /* ---- hero ---- */
 
-.hero { padding: 4.5rem 0 3.2rem; }
+.hero { padding: 5rem 0 16vh; }
 .hero h1 {
   margin: 0 0 0.6rem;
-  font-size: clamp(2.6rem, 7vw, 4.6rem);
-  line-height: 1.02;
-  letter-spacing: -0.03em;
+  font-size: clamp(3rem, 8vw, 6.2rem);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
 }
 .hero .lede {
   margin: 0;
@@ -96,23 +113,31 @@ main { max-width: var(--max); margin: 0 auto; padding: 0 1.25rem 4rem; }
 
 /* ---- case sections ---- */
 
-.case { padding: 3rem 0 0.5rem; border-top: 1px solid var(--line); }
-.case-head { max-width: 44em; margin-bottom: 1.6rem; }
-.case-head h2, .case-head h3 {
-  margin: 0 0 0.3rem;
-  font-size: 1.55rem;
-  letter-spacing: -0.015em;
-  line-height: 1.15;
+.case {
+  padding: 20vh 0 16vh;
+  background: var(--g, var(--paper));
+  color: var(--gi, var(--ink));
 }
-.case-head h3 { font-size: 1.2rem; }
+/* with the gradiating body layer live, sections go clear and the blend
+   happens in the tall padding gaps where nothing readable sits */
+.wall-live .case { background: transparent; }
+
+.case-head { max-width: 44em; margin-bottom: 3rem; }
+.case-head h2 {
+  margin: 0 0 0.8rem;
+  font-size: clamp(2.6rem, 6.5vw, 5.2rem);
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+}
+.case-head h3 { margin: 0 0 0.4rem; font-size: clamp(1.5rem, 3vw, 2.2rem); letter-spacing: -0.02em; line-height: 1.05; }
 .case-meta {
-  margin: 0 0 0.7rem;
-  color: var(--muted);
-  font-size: 0.88rem;
+  margin: 0 0 1rem;
+  color: var(--gm, var(--muted));
+  font-size: 0.85rem;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.16em;
 }
-.case-note { margin: 0; color: var(--ink); }
+.case-note { margin: 0; font-size: 1.05rem; max-width: 38em; }
 
 .grid {
   display: grid;
@@ -128,7 +153,7 @@ main { max-width: var(--max); margin: 0 auto; padding: 0 1.25rem 4rem; }
   overflow: hidden;
   border-radius: 6px;
   background: var(--tile);
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in oklab, var(--gi, var(--ink)) 14%, transparent);
 }
 .frame.tall { aspect-ratio: 3 / 4; }
 .frame.wide { aspect-ratio: 16 / 9; }
@@ -141,7 +166,7 @@ main { max-width: var(--max); margin: 0 auto; padding: 0 1.25rem 4rem; }
 }
 .grid figcaption {
   margin-top: 0.45rem;
-  color: var(--muted);
+  color: var(--gm, var(--muted));
   font-size: 0.86rem;
 }
 .grid .feature { grid-column: span 2; }
@@ -149,7 +174,32 @@ main { max-width: var(--max); margin: 0 auto; padding: 0 1.25rem 4rem; }
   .grid .feature { grid-column: span 1; }
 }
 
-/* small strip (engine garment layer) */
+/* The scatter: at desktop width each case grid becomes a 12-column canvas
+   and every tile takes its authored place (--c/--cs), vertical stagger
+   (--dy, negative values overlap the row above), depth (--z, shadow scales
+   with it), tilt (--rot) and drift rate (--d, read by the script). */
+@media (min-width: 1100px) {
+  .case .grid {
+    grid-template-columns: repeat(12, 1fr);
+    gap: 0 1.25rem;
+    margin-bottom: 3rem;
+  }
+  .case .grid figure {
+    grid-column: var(--c, auto) / span var(--cs, 4);
+    margin-top: var(--dy, 0rem);
+    position: relative;
+    z-index: var(--z, 1);
+    transform: rotate(var(--rot, 0deg));
+    will-change: transform;
+  }
+  .case .grid .feature { grid-column: var(--c, auto) / span var(--cs, 6); }
+  .case .grid .frame {
+    box-shadow: 0 calc(var(--z, 1) * 7px) calc(var(--z, 1) * 22px)
+      color-mix(in oklab, var(--g, #000) 55%, rgb(0 0 0 / 0.45));
+  }
+}
+
+/* small strip (engine garment layer) — stays a quiet row under the scatter */
 .strip {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
@@ -157,17 +207,18 @@ main { max-width: var(--max); margin: 0 auto; padding: 0 1.25rem 4rem; }
   margin: 0 0 0.5rem;
 }
 .strip .frame { aspect-ratio: 7 / 9; border-radius: 4px; }
-.strip-caption { color: var(--muted); font-size: 0.86rem; margin: 0 0 1.4rem; }
+.strip-caption { color: var(--gm, var(--muted)); font-size: 0.86rem; margin: 0 0 1.4rem; }
 
 /* identity sub-blocks */
-.sub-case { margin: 0 0 2.2rem; }
+.sub-case { margin: 0 0 16vh; }
+.sub-case:last-child { margin-bottom: 0; }
 
 /* ---- about + contact ---- */
 
-.about { padding: 3rem 0 1rem; border-top: 1px solid var(--line); }
-.about h2 { margin: 0 0 0.8rem; font-size: 1.55rem; letter-spacing: -0.015em; }
+.about { padding: 18vh 0 1rem; }
+.about h2 { margin: 0 0 0.8rem; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -0.03em; }
 .about p { max-width: 40em; margin: 0 0 1rem; }
 
-.contact { padding: 1rem 0 2rem; }
-.contact h2 { margin: 0 0 0.8rem; font-size: 1.55rem; letter-spacing: -0.015em; }
+.contact { padding: 1rem 0 14vh; }
+.contact h2 { margin: 0 0 0.8rem; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -0.03em; }
 .contact ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.35rem 1.2rem; }

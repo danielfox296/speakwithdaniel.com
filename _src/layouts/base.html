@@ -23,5 +23,127 @@
 {{content}}
 </main>
 {{footer}}
+<script>
+// The wall engine: (1) the page background gradiates between section ground
+// colors as the viewport crosses the tall gaps between sections, blended in
+// oklab so the passage stays clean; (2) at desktop width each work tile
+// drifts at its own rate (--d) against scroll, signet's set-wall mechanism.
+// Reduced motion keeps the grounds but snaps them and stands the drift down.
+// Without JS none of this runs and each section holds its solid ground.
+(function () {
+  var mm = window.matchMedia;
+  if (!mm) return;
+  var reduced = mm('(prefers-reduced-motion: reduce)').matches;
+  document.documentElement.classList.add('wall-live');
+
+  // --- grounds ---
+  function hexToOklab(hex) {
+    var n = parseInt(hex.slice(1), 16);
+    var c = [n >> 16 & 255, n >> 8 & 255, n & 255].map(function (v) {
+      v /= 255;
+      return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    var l = Math.cbrt(0.4122214708 * c[0] + 0.5363325363 * c[1] + 0.0514459929 * c[2]);
+    var m = Math.cbrt(0.2119034982 * c[0] + 0.6806995451 * c[1] + 0.1073969566 * c[2]);
+    var s = Math.cbrt(0.0883024619 * c[0] + 0.2817188376 * c[1] + 0.6299787005 * c[2]);
+    return [
+      0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s,
+      1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s,
+      0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s
+    ];
+  }
+  function cssColorToHex(str) {
+    var m2 = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (!m2) return '#f7f5f2';
+    return '#' + [1, 2, 3].map(function (i) {
+      return (+m2[i]).toString(16).padStart(2, '0');
+    }).join('');
+  }
+  var sections = [].slice.call(document.querySelectorAll('.hero, .case, .about'));
+  var paperLab;
+  function readPaper() {
+    document.body.style.backgroundColor = '';
+    paperLab = hexToOklab(cssColorToHex(getComputedStyle(document.body).backgroundColor));
+  }
+  readPaper();
+  var stops = sections.map(function (s) {
+    var g = getComputedStyle(s).getPropertyValue('--g').trim();
+    return { el: s, lab: g ? hexToOklab(g) : null };
+  });
+  mm('(prefers-color-scheme: dark)').addEventListener('change', function () {
+    readPaper(); paint();
+  });
+
+  // Blend across each boundary between adjacent sections. The window sits
+  // centered on the boundary line, which always lives inside the sections'
+  // tall paddings, so readable content never rests on a half-blended ground.
+  function mix(a, b, t) {
+    return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+  }
+  function bgFrame() {
+    var mid = window.innerHeight / 2;
+    var win = window.innerHeight * (reduced ? 0.03 : 0.3);
+    var lab = stops[0].lab || paperLab;
+    for (var i = 1; i < stops.length; i++) {
+      var boundary = stops[i].el.getBoundingClientRect().top;
+      var t = (mid - boundary) / win + 0.5;
+      if (t <= 0) break;
+      t = Math.min(1, t);
+      t = t * t * (3 - 2 * t);
+      lab = mix(lab, stops[i].lab || paperLab, t);
+    }
+    document.body.style.backgroundColor =
+      'oklab(' + lab[0].toFixed(4) + ' ' + lab[1].toFixed(4) + ' ' + lab[2].toFixed(4) + ')';
+  }
+
+  // --- drift ---
+  var tiles = [];
+  if (!reduced) {
+    document.querySelectorAll('.case .grid figure').forEach(function (t) {
+      tiles.push({
+        el: t,
+        d: parseFloat(t.style.getPropertyValue('--d')) || 0,
+        rot: (t.style.getPropertyValue('--rot') || '0deg').trim()
+      });
+    });
+  }
+  var MAX = 120, wide = mm('(min-width: 1100px)').matches;
+  function driftFrame() {
+    if (!wide) return;
+    var vh = window.innerHeight;
+    var shifts = tiles.map(function (t) {
+      var r = t.el.getBoundingClientRect();
+      if (r.bottom < -MAX || r.top > vh + MAX) return null;
+      return ((r.top + r.height / 2 - vh / 2) / vh) * t.d * -MAX;
+    });
+    shifts.forEach(function (y, i) {
+      if (y !== null) {
+        tiles[i].el.style.transform =
+          'translate3d(0,' + y.toFixed(1) + 'px,0) rotate(' + tiles[i].rot + ')';
+      }
+    });
+  }
+  mm('(min-width: 1100px)').addEventListener('change', function (e) {
+    wide = e.matches;
+    if (!wide) tiles.forEach(function (t) { t.el.style.transform = ''; });
+    paint();
+  });
+
+  var ticking = false;
+  function paint() {
+    ticking = false;
+    bgFrame();
+    driftFrame();
+  }
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(paint);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  paint();
+})();
+</script>
 </body>
 </html>
