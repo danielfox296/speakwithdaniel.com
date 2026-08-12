@@ -20,15 +20,15 @@ OUT = ROOT / "img" / "work"
 CROP_BOTTOM = {"photo-042.jpg": 0.925, "photo-060.jpg": 0.925}
 
 # sub-case groups by imported photo number
-FACES = [5, 6, 7, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 28, 29,
-         30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 44, 50, 51, 56,
-         57, 65, 69, 70]
-FIGURES = [1, 2, 3, 4, 8, 9, 25, 26, 27, 43, 45, 49, 52, 54, 55, 58, 59, 61,
-           62, 63, 66, 67, 71, 73, 74, 75, 76, 77, 78]
-STAGE = [10, 11, 46, 47, 48, 53, 64, 68, 72, 79, 80, 81, 82]
+# Daniel's cull, 2026-08-13: 71 keepers of the original 109.
+FACES = [13, 14, 15, 16, 17, 18, 20, 21, 22, 23, 28, 29, 31, 32, 33, 37, 39,
+         42, 44, 51, 56, 65, 70]
+FIGURES = [1, 3, 8, 26, 27, 43, 45, 49, 52, 54, 58, 59, 62, 63, 67, 73, 74,
+           75, 77, 78]
+STAGE = [10, 11, 46, 47, 48, 64, 68, 72, 79, 81]
+FLATSTATE = [4, 7, 8, 9, 12, 14, 15]
 POSTERS = ["valentine", "adopt-an-area", "art-of-the-cocktail", "documentary-night",
-           "may-poster", "monday-brunch", "osu-v-michigan-party",
-           "posh-the-halls-porch-doors1", "rise-and-shine-breakfast",
+           "monday-brunch", "posh-the-halls-porch-doors1", "rise-and-shine-breakfast",
            "sipandsketch2", "terrarium-final", "visioning-flyer", "wine-down"]
 
 
@@ -43,11 +43,15 @@ def prep(src: pathlib.Path, dst: pathlib.Path, max_w=1600, crop=None) -> None:
 
 
 def prep_all() -> None:
+    kept = set(FACES + FIGURES + STAGE)
     for p in sorted((SRC / "photo").glob("photo-*")):
+        if int(p.stem.split("-")[1]) not in kept:
+            continue  # culled 2026-08-13; source stays staged, repo stays lean
         prep(p, OUT / "photo" / (p.stem + ".jpg"), max_w=1400,
              crop=CROP_BOTTOM.get(p.name))
     for i, p in enumerate(sorted((SRC / "flatstate").glob("*")), 1):
-        prep(p, OUT / "photo" / f"fs-{i:02d}.jpg", max_w=1400)
+        if i in FLATSTATE:
+            prep(p, OUT / "photo" / f"fs-{i:02d}.jpg", max_w=1400)
     for name in POSTERS:
         prep(SRC / "design" / f"{name}.jpg", OUT / "posters" / f"{name}.jpg")
     # design artifacts routed to existing sections
@@ -126,12 +130,12 @@ def emit() -> None:
     </header>
     <div class="grid">
       <figure class="ghost" aria-hidden="true" style="--gx:16%;--gy:4%;--gw:60%;--d:0.08">
-        <img src="img/work/photo/fs-11.jpg" alt="" loading="lazy">
+        <img src="img/work/photo/fs-12.jpg" alt="" loading="lazy">
       </figure>
 {figures_html([f"photo/photo-{n:03d}.jpg" for n in FIGURES], ["Photograph" for _ in FIGURES])}
     </div>
 {sub("Faces", "The headshot wall: owners, makers, and performers, most of them laughing before the third frame.", FACES)}
-{sub("The Flat State series", "A standing studio portrait series, one subject at a time.", list(range(1, 16)), prefix="fs-")}
+{sub("The Flat State series", "A standing studio portrait series, one subject at a time.", FLATSTATE, prefix="fs-")}
 {sub("Stage and sound", "Musicians at work: studios, stages, windows, and the hour after the set.", STAGE)}
   </div>
 </section>
