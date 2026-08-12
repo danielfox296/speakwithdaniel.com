@@ -21,7 +21,9 @@ CROP_BOTTOM = {"photo-042.jpg": 0.925, "photo-060.jpg": 0.925}
 
 # sub-case groups by imported photo number
 # Daniel's cull, 2026-08-13: 71 keepers of the original 109.
-FACES = [13, 14, 15, 16, 17, 18, 20, 21, 22, 23, 28, 29, 31, 32, 33, 37, 39,
+# photo-039 dropped 2026-08-13: same negative as the Flat State comp shipping
+# as fs-04 (camera frame 7718 imported twice); the series treatment stays.
+FACES = [13, 14, 15, 16, 17, 18, 20, 21, 22, 23, 28, 29, 31, 32, 33, 37,
          42, 44, 51, 56, 65, 70]
 FIGURES = [1, 3, 8, 26, 27, 43, 45, 49, 52, 54, 58, 59, 62, 63, 67, 73, 74,
            75, 77, 78]
